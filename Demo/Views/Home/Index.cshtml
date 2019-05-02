@@ -1,0 +1,139 @@
+﻿@model List<Demo.Models.DemoClass>
+
+@{
+    <style>
+        .sidepanel {
+            float: left;
+            width: 15%;
+            height: 900px;
+            overflow-x: scroll;
+        }
+
+        .grid {
+            margin-left: 30%;
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            // Grid
+            var gridDataSource = new kendo.data.HierarchicalDataSource({
+                type: "json",
+                transport: {
+                    read: "https://localhost:44304/Home/GetData?isTreeData=false"
+                },
+                pageSize: 5,
+                schema: {
+                    model: {
+                        id: "id"
+                    }
+                }
+            });
+
+            var grid = $('#grid').kendoGrid({
+                dataSource: gridDataSource,
+                height: 450,
+                groupable: false,
+                selectable: "row",
+                sortable: true,
+                pageable: {
+                    refresh: true,
+                    pageSizes: true,
+                    buttonCount: 5
+                },
+                columns: [
+                    {
+                        field: "name",
+                        title: "Name"
+                    }, {
+                        field: "details",
+                        title: "Details"
+                    }]
+            }).data("kendoGrid");
+
+            $(grid.element).kendoDraggable({
+                filter: 'tr',
+                hint: function (e) {
+                    return e.clone().css({
+                        "opacity": 0.6,
+                        "background-color": "#0cf"
+                    });
+                }
+            });
+
+            // Tree
+            var treeDataSource = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "https://localhost:44304/Home/GetData?isTreeData=true",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "id",
+                        hasChildren: "hasChildren"
+                    }
+                }
+            });
+
+            var tree = $("#treelist").kendoTreeView({
+                dataSource: treeDataSource,
+                dataTextField: "name",
+                dragAndDrop: true
+            }).data("kendoTreeView");
+
+            $(tree.element).kendoDropTargetArea({
+                filter: 'li',
+                drop: function (e) {
+                    var draggableElement = e.draggable.currentTarget,
+                        source = gridDataSource.getByUid(draggableElement.data("uid"));
+
+                    var droppableElement = e.dropTarget,
+                        destination = treeDataSource.getByUid(droppableElement.data("uid"));
+                    
+                    $.ajax({
+                        type: "POST",
+                        url: "https://localhost:44304/api/update",
+                        data: {
+                            sourceId: source.id, destinationId: destination.id
+                        },
+                        success: function () {
+                            var tree = $("#treelist").data("kendoTreeView");
+                            tree.dataSource.read();
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+                            alert(xhr.responseText);
+                        }
+                    });
+                }
+            });
+
+            $('#deleteNode').on('click', function () {
+                let selectedDataItem = tree.dataItem(tree.select());
+                $.ajax({
+                    type: "DELETE",
+                    url: "https://localhost:44304/api/delete?id=" + selectedDataItem.id,
+                    success: function () {
+                        var tree = $("#treelist").data("kendoTreeView");
+                        tree.dataSource.read();
+
+                        var grid = $('#grid').data('kendoGrid');
+                        grid.dataSource.read();
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <div>
+        <div id="treelist" class="grid"></div>
+        <input type="button" value="Delete" id="deleteNode" />
+
+        <div id="grid" class="sidePanel"></div>
+    </div>
+}
