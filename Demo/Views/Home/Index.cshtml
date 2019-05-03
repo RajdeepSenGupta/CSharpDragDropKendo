@@ -13,31 +13,32 @@
         $(document).ready(function () {
 
             // Grid 1
+            // Fetch the data source of the grid.
             var gridDataSource = new kendo.data.HierarchicalDataSource({
                 type: "json",
                 transport: {
-                    read: "https://localhost:44304/Home/GetData?isTreeData=false"
+                    read: "https://localhost:44304/Home/GetData?isTreeData=false"                           // The transport read method performs an http get request and fetches the data
                 },
                 pageSize: 5,
-                schema: {
+                schema: {                                                                                   // The schema model assigns the data id to each row
                     model: {
                         id: "id"
                     }
                 }
             });
 
-            var grid = $('#grid').kendoGrid({
+            var grid = $('#grid').kendoGrid({                                                               // Creates the grid on the selected html element with the defined properties
                 dataSource: gridDataSource,
                 height: 450,
                 groupable: false,
                 selectable: "row",
                 sortable: true,
-                pageable: {
+                pageable: {                                                                                 // Set this for showing the default pagination of the grid
                     refresh: true,
                     pageSizes: true,
                     buttonCount: 5
                 },
-                columns: [
+                columns: [                                                                                 // Defines the column of the grid. 'field' defines the property name. 'title' defines the header of the column
                     {
                         field: "name",
                         title: "Name"
@@ -47,7 +48,7 @@
                     }]
             }).data("kendoGrid");
 
-            $(grid.element).kendoDraggable({
+            $(grid.element).kendoDraggable({                                                               // Enables the 'tr' elements to be draggable
                 filter: 'tr',
                 hint: function (e) {
                     return e.clone().css({
@@ -58,7 +59,7 @@
             });
 
             // Tree
-            var treeDataSource = new kendo.data.HierarchicalDataSource({
+            var treeDataSource = new kendo.data.HierarchicalDataSource({                                    // The transport read method performs an http get request and fetches the data
                 transport: {
                     read: {
                         url: "https://localhost:44304/Home/GetData?isTreeData=true",
@@ -73,17 +74,25 @@
                 }
             });
 
-            var tree = $("#treelist").kendoTreeView({
+            var tree = $("#treelist").kendoTreeView({                                                       // Creates the tree view on the selected html element with the defined properties
                 dataSource: treeDataSource,
                 dataTextField: "name",
                 dragAndDrop: true
             }).data("kendoTreeView");
 
-            $(tree.element).kendoDropTargetArea({
+            $(tree.element).kendoDropTargetArea({                                                           // Sets a particular target area to be droppable, when a drag method is in process
                 filter: 'li',
                 drop: function (e) {
+                    debugger
                     var draggableElement = e.draggable.currentTarget,
                         source = gridDataSource.getByUid(draggableElement.data("uid"));
+
+                    if (source === null || source === undefined) {
+                        source = gridDataSource2.getByUid(draggableElement.data("uid"));
+                        if (source === null || source === undefined) {
+                            source = gridDataSource3.getByUid(draggableElement.data("uid"));
+                        }
+                    }
 
                     var droppableElement = e.dropTarget,
                         destination = treeDataSource.getByUid(droppableElement.data("uid"));
@@ -105,8 +114,9 @@
                 }
             });
 
-            $('#deleteNode').on('click', function () {
-                let selectedDataItem = tree.dataItem(tree.select());
+            $('#deleteNode').on('click', function () {                                                      // Deletes particular element
+                let selectedDataItem = tree.dataItem(tree.select());                                        // Helps to get the selected item of a tree. When clicked, kendo retains the 'selected' status which helps to get the selected element. (continue..)
+                                                                                                            // To make an element selectable, 'selectable' property of a kendo element is used. (Please check line #34)
                 $.ajax({
                     type: "DELETE",
                     url: "https://localhost:44304/api/delete?id=" + selectedDataItem.id,
@@ -182,7 +192,7 @@
                 }
             });
 
-            var grid2 = $('#grid3').kendoGrid({
+            var grid3 = $('#grid3').kendoGrid({
                 dataSource: gridDataSource3,
                 height: 450,
                 groupable: false,
