@@ -2,22 +2,17 @@
 
 @{
     <style>
-        .sidepanel {
-            float: left;
-            width: 15%;
-            height: 900px;
-            overflow-x: scroll;
-        }
-
-        .grid {
-            margin-left: 30%;
+        .bg-whitesmoke {
+            background-color: whitesmoke;
         }
     </style>
+
+
 
     <script type="text/javascript">
         $(document).ready(function () {
 
-            // Grid
+            // Grid 1
             var gridDataSource = new kendo.data.HierarchicalDataSource({
                 type: "json",
                 transport: {
@@ -92,7 +87,7 @@
 
                     var droppableElement = e.dropTarget,
                         destination = treeDataSource.getByUid(droppableElement.data("uid"));
-                    
+
                     $.ajax({
                         type: "POST",
                         url: "https://localhost:44304/api/update",
@@ -127,13 +122,122 @@
                     }
                 });
             });
+
+            // Grid 2
+            var gridDataSource2 = new kendo.data.HierarchicalDataSource({
+                type: "json",
+                transport: {
+                    read: "https://localhost:44304/Home/GetData?isTreeData=false"
+                },
+                pageSize: 5,
+                schema: {
+                    model: {
+                        id: "id"
+                    }
+                }
+            });
+
+            var grid2 = $('#grid2').kendoGrid({
+                dataSource: gridDataSource2,
+                height: 450,
+                groupable: false,
+                selectable: "row",
+                sortable: true,
+                pageable: {
+                    refresh: true,
+                    pageSizes: true,
+                    buttonCount: 5
+                },
+                columns: [
+                    {
+                        field: "name",
+                        title: "Name"
+                    }, {
+                        field: "details",
+                        title: "Details"
+                    }]
+            }).data("kendoGrid");
+
+            $(grid2.element).kendoDraggable({
+                filter: 'tr',
+                hint: function (e) {
+                    return e.clone().css({
+                        "opacity": 0.6,
+                        "background-color": "#0cf"
+                    });
+                }
+            });
+
+            // Grid 3
+            var gridDataSource3 = new kendo.data.HierarchicalDataSource({
+                type: "json",
+                transport: {
+                    read: "https://localhost:44304/Home/GetData?isTreeData=false"
+                },
+                pageSize: 5,
+                schema: {
+                    model: {
+                        id: "id"
+                    }
+                }
+            });
+
+            var grid2 = $('#grid3').kendoGrid({
+                dataSource: gridDataSource3,
+                height: 450,
+                groupable: false,
+                selectable: "row",
+                sortable: true,
+                pageable: {
+                    refresh: true,
+                    pageSizes: true,
+                    buttonCount: 5
+                },
+                columns: [
+                    {
+                        field: "name",
+                        title: "Name"
+                    }, {
+                        field: "details",
+                        title: "Details"
+                    }]
+            }).data("kendoGrid");
+
+            $(grid3.element).kendoDraggable({
+                filter: 'tr',
+                hint: function (e) {
+                    return e.clone().css({
+                        "opacity": 0.6,
+                        "background-color": "#0cf"
+                    });
+                }
+            });
         });
     </script>
 
-    <div>
-        <div id="treelist" class="grid"></div>
-        <input type="button" value="Delete" id="deleteNode" />
-
-        <div id="grid" class="sidePanel"></div>
+    <div class="row border">
+        <div class="col-12 col-md-4 col-lg-3 p-0 bg-whitesmoke border-right">
+            <div class="card-header d-flex align-items-center">
+                <h6 class="flex-grow-1">Tree View:</h6>
+                <input class="btn btn-primary" type="button" value="Delete" id="deleteNode" />
+            </div>
+            <div class="p-2">
+                <div id="treelist" class="grid"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-8 col-lg-9 px-0">
+            <h6 class="card-header">Grid View 1:</h6>
+            <div id="grid" class="sidePanel"></div>
+            <div class="row m-0">
+                <div class="col-6">
+                    <h6 class="card-header">Grid View 2:</h6>
+                    <div id="grid2" class="sidePanel"></div>
+                </div>
+                <div class="col-6">
+                    <h6 class="card-header">Grid View 3:</h6>
+                    <div id="grid3" class="sidePanel"></div>
+                </div>
+            </div>
+        </div>
     </div>
 }
