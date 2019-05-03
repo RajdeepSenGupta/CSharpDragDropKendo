@@ -52,6 +52,12 @@ namespace Demo.Controllers
             _list.InitialDataList.Remove(deletingObj);
             return Ok();
         }
+
+        [HttpGet("api/select")]
+        public IActionResult Select(int id)
+        {
+            return Ok();
+        }
     }
 
     public class UpdateObj

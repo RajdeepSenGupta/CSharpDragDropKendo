@@ -77,7 +77,21 @@
             var tree = $("#treelist").kendoTreeView({                                                       // Creates the tree view on the selected html element with the defined properties
                 dataSource: treeDataSource,
                 dataTextField: "name",
-                dragAndDrop: true
+                dragAndDrop: true,
+                select: function (e) {
+                    let selectedNodeId = tree.dataItem(e.node).id;
+                    $.ajax({
+                        type: "GET",
+                        url: "https://localhost:44304/api/select?id=" + selectedNodeId,
+                        success: function () {
+                            var tree = $("#treelist").data("kendoTreeView");
+                            tree.dataSource.read();
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+                            alert(xhr.responseText);
+                        }
+                    });
+                }
             }).data("kendoTreeView");
 
             $(tree.element).kendoDropTargetArea({                                                           // Sets a particular target area to be droppable, when a drag method is in process
